@@ -99,7 +99,7 @@ class SixPayResponseHandler(BaseRequestHandler):
 
     def _process_args(self):
         super(SixPayResponseHandler, self)._process_args()
-        self.sixpay_url = self._get_setting('url')
+        self.sixpay_url = get_setting('url')
 
     def _process(self):
         """Process the reply from SixPay about the transaction."""
@@ -153,8 +153,8 @@ class SixPayResponseHandler(BaseRequestHandler):
         """
         request_url = urlparse.urljoin(self.sixpay_url, endpoint)
         credentials = (
-            self._get_setting('username'),
-            self._get_setting('password')
+            get_setting('username'),
+            get_setting('password')
         )
         response = requests.post(
             request_url, json=data, auth=credentials

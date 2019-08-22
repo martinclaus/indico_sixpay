@@ -31,12 +31,14 @@ from werkzeug.exceptions import (
     InternalServerError as HTTPInternalServerError
 )
 
-from wtforms.fields import StringField
+from wtforms.fields import StringField, BooleanField
 from wtforms.fields.html5 import URLField
 from wtforms.validators import (
     DataRequired, Optional, Regexp, Length, Email, ValidationError
 )
 from indico.web.forms.fields import IndicoPasswordField
+from indico.web.forms.validators import HiddenUnless
+from indico.web.forms.widgets import SwitchWidget
 
 from indico.core.plugins import IndicoPlugin, url_for_plugin
 from indico.modules.events.payment import (
@@ -149,14 +151,28 @@ class PluginSettingsForm(PaymentPluginSettingsFormBase):
         validators=[DataRequired()],
         description=gettext('URL to contact the Six Payment Service'),
     )
+    credentials_in_db = BooleanField(
+        label=gettext("API credentials in Database"),
+        widget=SwitchWidget(),
+        description=gettext(
+		'Note that the API password will be saved as plain text in the database.'
+                'If not set, the credentials must be put into the .netrc file of the user running the Indico server.'
+        )
+    )
     username = StringField(
         label=gettext('Username'),
-        validators=[DataRequired()],
+        validators=[
+            HiddenUnless('credentials_in_db', preserve_data=False),
+            DataRequired()
+        ],
         description=gettext('SaferPay JSON API User name.')
     )
     password = IndicoPasswordField(
         label=gettext('Password'),
-        validators=[DataRequired()],
+        validators=[
+            HiddenUnless('credentials_in_db', preserve_data=False),
+            DataRequired()
+        ],
         description=gettext('SaferPay JSON API User password.'),
         toggle=True,
     )
@@ -233,6 +249,7 @@ class SixpayPaymentPlugin(PaymentPluginMixin, IndicoPlugin):
     default_settings = {
         'method_name': 'SixPay',
         'url': 'https://www.saferpay.com/api/',
+        'credentials_in_db': False,
         'username': None,
         'password': None,
         'account_id': None,

@@ -42,7 +42,8 @@ from .utility import (
     saferpay_pp_capture_url,
     saferpay_json_api_spec,
     saferpay_pp_cancel_url,
-    provider
+    provider,
+    get_auth
 )
 
 # RH from indico.web.rh
@@ -152,12 +153,8 @@ class SixPayResponseHandler(BaseRequestHandler):
         is raised for ``task``.
         """
         request_url = urlparse.urljoin(self.sixpay_url, endpoint)
-        credentials = (
-            get_setting('username'),
-            get_setting('password')
-        )
         response = requests.post(
-            request_url, json=data, auth=credentials
+            request_url, json=data, auth=get_auth()
         )
         try:
             response.raise_for_status()

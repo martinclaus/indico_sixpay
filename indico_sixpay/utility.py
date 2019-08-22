@@ -137,3 +137,15 @@ def get_setting(setting, event=None):
         )
     else:
         return current_plugin.settings.get(setting)
+
+def get_auth():
+    """Return username and password tuple if sored in DB.
+    
+    If the credentials are not stored in the DB, None will be
+    returned and requests will try to taken them from the users .netrc file.
+    """
+    credentials_in_db = current_plugin.settings.get('credentials_in_db')
+    username = current_plugin.settings.get('username')
+    password = current_plugin.settings.get('password')
+    if credentials_in_db and username and password:
+        return (username, password)

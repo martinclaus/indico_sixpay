@@ -53,7 +53,7 @@ from indico.modules.events.payment.models.transactions import (
 
 from .utility import (
     gettext, to_small_currency, get_request_header, get_terminal_id,
-    provider
+    provider, get_auth
 )
 # blueprint mounts the request handlers onto URLs
 from .blueprint import blueprint
@@ -305,8 +305,6 @@ class SixpayPaymentPlugin(PaymentPluginMixin, IndicoPlugin):
         init_response = self._init_payment_page(
             sixpay_url=plugin_settings['url'],
             transaction_data=transaction,
-            credentials=(
-                plugin_settings['username'], plugin_settings['password'])
         )
         data['payment_url'] = init_response['RedirectUrl']
 
@@ -427,13 +425,13 @@ class SixpayPaymentPlugin(PaymentPluginMixin, IndicoPlugin):
             )
         return transaction_parameters
 
-    def _init_payment_page(self, sixpay_url, transaction_data, credentials):
+    def _init_payment_page(self, sixpay_url, transaction_data):
         """Initialize payment page."""
         endpoint = urlparse.urljoin(sixpay_url, saferpay_pp_init_url)
         url_request = requests.post(
             endpoint,
             json=transaction_data,
-            auth=credentials
+            auth=get_auth()
         )
         # raise any HTTP errors
         url_request.raise_for_status()
